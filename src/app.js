@@ -7,6 +7,8 @@ import emailRoutes from "./routes/emailRoutes.js";
 
 // Midleeware de errores
 import { errorHandler } from "./middleware/errorHandler.js";
+// Middleware de validación JWT
+import { validateJWT } from "./middleware/validateJWT.js";
 
 dotenv.config();
 
@@ -79,7 +81,7 @@ app.get("/health", (req, res) => {
 });
 
 // Rutas de la API
-app.use("/api/emails", emailRoutes);
+app.use("/api/emails", validateJWT, emailRoutes);
 
 // Manejo de errores 404
 app.use((req, res, next) => {
