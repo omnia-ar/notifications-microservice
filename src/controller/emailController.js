@@ -6,20 +6,18 @@ dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-/**
- * Envía un correo electrónico utilizando Resend
- * @param {string} to - Dirección de correo electrónico del destinatario
- * @param {string} subject - Asunto del correo
- * @param {string} html - Contenido HTML del correo
- * @returns {Promise<Object>} - Respuesta del envío de correo
- */
+const safeName = (name) => {
+  if (!name) return "Usuario";
+  return name;
+};
+
 const sendEmail = async (to, subject, html) => {
   try {
     const { data, error } = await resend.emails.send({
       from: `Omnia <${process.env.EMAIL_FROM}>`,
       to: [to],
-      subject: subject,
-      html: html,
+      subject,
+      html,
     });
 
     if (error) {
@@ -34,12 +32,24 @@ const sendEmail = async (to, subject, html) => {
   }
 };
 
-// Controladores para cada tipo de correo
+// URLs desde .env
+const URLS = {
+  dashboard: process.env.DASHBOARD_URL,
+  invoiceBase: process.env.INVOICE_BASE_URL,
+  planes: process.env.PLANES_URL,
+  support: process.env.SUPPORT_URL,
+};
+
 const emailControllers = {
   newUser: async (req, res) => {
     try {
       const { email, name } = req.body;
-      const html = templates({ name, email }).newUser();
+
+      const html = templates({
+        name: safeName(name),
+        email,
+        urls: URLS,
+      }).newUser();
 
       await sendEmail(email, "¡Bienvenido a Omnia!", html);
 
@@ -59,24 +69,26 @@ const emailControllers = {
   newSubscription: async (req, res) => {
     try {
       const { email, name, planName, amount, endDate } = req.body;
+
       const html = templates({
-        name,
+        name: safeName(name),
         email,
         planName,
         amount,
         endDate,
+        urls: URLS,
       }).newSubscription();
 
       await sendEmail(email, "¡Suscripción Activada!", html);
 
       res.status(200).json({
         success: true,
-        message: "Correo de activación de suscripción enviado correctamente",
+        message: "Correo de activación enviado correctamente",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Error al enviar el correo de activación de suscripción",
+        message: "Error al enviar correo de activación",
         error: error.message,
       });
     }
@@ -84,26 +96,30 @@ const emailControllers = {
 
   paymentSuccess: async (req, res) => {
     try {
-      const { email, name, planName, amount, endDate, invoiceUrl } = req.body;
+      const { email, name, planName, amount, endDate, invoiceId } = req.body;
+
+      const invoiceUrl = `${URLS.invoiceBase}`;
+
       const html = templates({
-        name,
+        name: safeName(name),
         email,
         planName,
         amount,
         endDate,
         invoiceUrl,
+        urls: URLS,
       }).paymentSuccess();
 
       await sendEmail(email, "¡Pago Recibido!", html);
 
       res.status(200).json({
         success: true,
-        message: "Correo de confirmación de pago enviado correctamente",
+        message: "Correo enviado correctamente",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Error al enviar el correo de confirmación de pago",
+        message: "Error al enviar correo de pago",
         error: error.message,
       });
     }
@@ -111,43 +127,53 @@ const emailControllers = {
 
   paymentPending: async (req, res) => {
     try {
-      console.log("body paymentPending".req.body);
-      const { email, name, planName, dashboardUrl } = req.body;
+      const { email, name, planName } = req.body;
+
       const html = templates({
-        name,
+        name: safeName(name),
         email,
         planName,
-        dashboardUrl,
+        dashboardUrl: URLS.dashboard,
+        urls: URLS,
       }).paymentPending();
+
       await sendEmail(email, "El pago se encuentra pendiente", html);
+
       res.status(200).json({
         success: true,
-        message: "Correo de pago pendiente enviado correctamente",
+        message: "Correo enviado correctamente",
       });
-    } catch (error) {}
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Error al enviar correo",
+        error: error.message,
+      });
+    }
   },
 
   paymentFailed: async (req, res) => {
     try {
-      console.log("body paymentFailed".req.body);
-      const { email, name, planName, dashboardUrl } = req.body;
+      const { email, name, planName } = req.body;
+
       const html = templates({
-        name,
+        name: safeName(name),
         email,
         planName,
-        dashboardUrl,
+        dashboardUrl: URLS.dashboard,
+        urls: URLS,
       }).paymentFailed();
 
       await sendEmail(email, "Error en el Procesamiento del Pago", html);
 
       res.status(200).json({
         success: true,
-        message: "Correo de error de pago enviado correctamente",
+        message: "Correo enviado correctamente",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Error al enviar el correo de error de pago",
+        message: "Error al enviar correo",
         error: error.message,
       });
     }
@@ -156,23 +182,25 @@ const emailControllers = {
   subscriptionCancel: async (req, res) => {
     try {
       const { email, name, planName, endDate } = req.body;
+
       const html = templates({
-        name,
+        name: safeName(name),
         email,
         planName,
         endDate,
+        urls: URLS,
       }).suscriptionCancel();
 
       await sendEmail(email, "Suscripción Cancelada", html);
 
       res.status(200).json({
         success: true,
-        message: "Correo de cancelación de suscripción enviado correctamente",
+        message: "Correo enviado correctamente",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Error al enviar el correo de cancelación de suscripción",
+        message: "Error al enviar correo",
         error: error.message,
       });
     }
@@ -181,18 +209,24 @@ const emailControllers = {
   newFreeTrial: async (req, res) => {
     try {
       const { email, name, endDate } = req.body;
-      const html = templates({ name, email, endDate }).newFreeTrial();
+
+      const html = templates({
+        name: safeName(name),
+        email,
+        endDate,
+        urls: URLS,
+      }).newFreeTrial();
 
       await sendEmail(email, "¡Prueba Gratis Activada!", html);
 
       res.status(200).json({
         success: true,
-        message: "Correo de prueba gratuita enviado correctamente",
+        message: "Correo enviado correctamente",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Error al enviar el correo de prueba gratuita",
+        message: "Error al enviar correo",
         error: error.message,
       });
     }
