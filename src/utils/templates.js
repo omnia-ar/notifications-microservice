@@ -1,10 +1,39 @@
 const baseStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  body { font-family: 'Inter', Arial, sans-serif; margin: 0; padding: 0; background-color: #1a1a1a; color: #f5f5f5; }
-  .container { max-width: 600px; margin: 0 auto; background-color: #232323; }
-  .header { padding: 24px; text-align: center; border-bottom: 1px solid #333333; }
-  .content { padding: 24px; }
-  .footer { padding: 16px; text-align: center; font-size: 12px; color: #999999; background-color: #1a1a1a; }
+
+  body { 
+    font-family: 'Inter', Arial, sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    background-color: #1a1a1a; 
+    color: #f5f5f5; 
+  }
+
+  .container { 
+    max-width: 600px; 
+    margin: 0 auto; 
+    background-color: #232323; 
+  }
+
+  .header { 
+    padding: 24px; 
+    text-align: center; 
+    border-bottom: 1px solid #333333; 
+  }
+
+  .content { 
+    padding: 24px; 
+    color: #ffffff; /* ← Texto blanco dentro del contenido */
+  }
+
+  .footer { 
+    padding: 16px; 
+    text-align: center; 
+    font-size: 12px; 
+    color: #999999; 
+    background-color: #1a1a1a; 
+  }
+
   .button { 
     display: inline-block; 
     padding: 12px 24px; 
@@ -15,15 +44,26 @@ const baseStyles = `
     font-weight: 500;
     margin: 16px 0;
   }
+
   .text-muted { color: #999999; }
+
   .text-accent { color: #9d4edd; }
+
   .card { 
     background-color: #333333; 
     border-radius: 8px; 
     padding: 16px; 
     margin: 16px 0;
     border-left: 4px solid #9d4edd;
+    color: #ffffff; /* ← TEXTO BLANCO EN LAS CARDS */
   }
+
+  .card h3,
+  .card p,
+  .card strong {
+    color: #ffffff !important; /* ← Asegura blanco en todos los textos */
+  }
+
   .divider { 
     height: 1px; 
     background-color: #333333; 
@@ -31,6 +71,7 @@ const baseStyles = `
     border: none;
   }
 `;
+
 
 const getEmailTemplate = (content, title) => `
 <!DOCTYPE html>
@@ -68,10 +109,10 @@ export const templates = (user = {}) => {
       Date.now() + 30 * 24 * 60 * 60 * 1000
     ).toLocaleDateString(),
     amount = "9.99",
-    invoiceUrl = "#",
-    supportEmail = "soporte@omnia.com",
-    loginUrl = "https://app.omnia.com/login",
-    dashboardUrl = "https://app.omnia.com/dashboard",
+    invoiceUrl = "https://omnia-ar.com/payments/history",
+    supportEmail = "soporte@omnia-ar.com",
+    loginUrl = "https://omnia-ar.com/login",
+    dashboardUrl = "https://omnia-ar.com/dashboard",
   } = user;
 
   return {
@@ -168,7 +209,7 @@ export const templates = (user = {}) => {
         <p><strong>Monto:</strong> $${amount} ARS</p>
         <p><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</p>
         <p><strong>Próximo cargo:</strong> ${endDate}</p>
-        <p><a href="${invoiceUrl}" class="text-accent">Ver factura</a></p>
+        <p><a href="${invoiceUrl}" class="text-accent">Ver pago en la web</a></p>
       </div>
       
       <p>Gracias por confiar en Omnia. ¡Disfruta de nuestros servicios!</p>
