@@ -30,12 +30,13 @@ app.use(express.json()); // Para parsear JSON en las peticiones
 // Lista de orígenes permitidos
 const allowedOrigins = [
   // Frontends
-  process.env.FRONTEND_URL, // https://omnia-ar.com
-  process.env.FRONTEND_URL_VERCEL, // https://omnia-ai-nine.vercel.app
-  "https://www.omnia-ar.com", // Si usas www
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL_VERCEL,
+  "https://www.omnia-ar.com",
 
   process.env.API_BACK_URL,
   process.env.PAYMENT_MICROSERVICE_URL,
+  process.env.GATEWAY_URL,
 
   // Desarrollo local
   "http://localhost:3000",
