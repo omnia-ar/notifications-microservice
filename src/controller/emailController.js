@@ -236,6 +236,53 @@ const emailControllers = {
       });
     }
   },
+
+  changeStatusSubscription: async (req, res) => {
+    try {
+      const { email, status } = req.body;
+
+      // Validar que el status sea válido
+      const validStatuses = [
+        "active",
+        "inactive",
+        "trial",
+        "canceled",
+        "expired",
+        "pending",
+      ];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Estado inválido. Los estados válidos son: ${validStatuses.join(
+            ", "
+          )}`,
+        });
+      }
+
+      // Obtener datos del usuario desde la base de datos
+      const dataUser = await getUserDataBySub(email);
+      const { name } = dataUser;
+
+      const html = templates({
+        name: safeName(name),
+        email,
+        urls: URLS,
+      }).changeStatusSubscription(status);
+
+      await sendEmail(email, "Actualización de tu Suscripción", html);
+
+      res.status(200).json({
+        success: true,
+        message: "Correo de cambio de estado enviado correctamente",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Error al enviar correo de cambio de estado",
+        error: error.message,
+      });
+    }
+  },
 };
 
 export default emailControllers;

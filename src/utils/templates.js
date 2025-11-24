@@ -72,7 +72,6 @@ const baseStyles = `
   }
 `;
 
-
 const getEmailTemplate = (content, title) => `
 <!DOCTYPE html>
 <html>
@@ -255,6 +254,178 @@ export const templates = (user = {}) => {
       <p>Si no realizaste esta transacción o necesitas ayuda, por favor contáctanos de inmediato.</p>
     `,
         "Pago Pendiente"
+      ),
+
+    changeStatusSubscription: (status = "pending") =>
+      getEmailTemplate(
+        `
+      ${(() => {
+        // Mapeo de estados a información legible
+        const statusInfo = {
+          active: {
+            label: "Activa",
+            color: "#22c55e",
+            bgColor: "#dcfce7",
+            icon: "✓",
+            message:
+              "¡Excelente! Tu suscripción está activa y puedes disfrutar de todos los beneficios de Omnia.",
+            action:
+              "Explora todas las funcionalidades disponibles en tu cuenta.",
+          },
+          inactive: {
+            label: "Inactiva",
+            color: "#ef4444",
+            bgColor: "#fee2e2",
+            icon: "⚠",
+            message:
+              "Tu suscripción se encuentra temporalmente inactiva. Puedes reactivarla en cualquier momento.",
+            action:
+              "Contacta con soporte o revisa tu método de pago para reactivar tu cuenta.",
+          },
+          trial: {
+            label: "Periodo de Prueba",
+            color: "#3b82f6",
+            bgColor: "#dbeafe",
+            icon: "🚀",
+            message:
+              "¡Bienvenido! Estás en tu periodo de prueba gratuito. Explora todas las funcionalidades de Omnia.",
+            action:
+              "Aprovecha al máximo tu periodo de prueba y considera suscribirte para continuar.",
+          },
+          canceled: {
+            label: "Cancelada",
+            color: "#6b7280",
+            bgColor: "#f3f4f6",
+            icon: "✕",
+            message:
+              "Tu suscripción ha sido cancelada. Lamentamos verte partir.",
+            action:
+              "Si cambias de opinión, puedes volver a suscribirte en cualquier momento.",
+          },
+          expired: {
+            label: "Expirada",
+            color: "#f97316",
+            bgColor: "#fed7aa",
+            icon: "⏰",
+            message:
+              "Tu suscripción ha expirado. Renueva tu plan para seguir disfrutando de Omnia.",
+            action:
+              "Renueva tu suscripción para recuperar el acceso completo a la plataforma.",
+          },
+          pending: {
+            label: "Pendiente",
+            color: "#eab308",
+            bgColor: "#fef3c7",
+            icon: "⏳",
+            message:
+              "Tu suscripción está siendo procesada. Te notificaremos cuando esté lista.",
+            action:
+              "Mantente atento a tu email para recibir actualizaciones sobre tu suscripción.",
+          },
+        };
+
+        const currentStatus = statusInfo[status] || statusInfo.pending;
+
+        return `
+          <div style="text-align: center; margin-bottom: 24px;">
+            <p style="color: #999999; font-size: 0.9rem; margin-bottom: 16px;">Actualización de tu suscripción</p>
+            
+            <!-- Estado Badge -->
+            <div style="display: inline-block; background: ${
+              currentStatus.bgColor
+            }; color: ${
+          currentStatus.color
+        }; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; margin-bottom: 20px;">
+              <span style="margin-right: 6px;">${currentStatus.icon}</span>
+              ${currentStatus.label}
+            </div>
+          </div>
+
+          <h2 style="color: #9d4edd; margin: 0 0 20px 0; font-size: 1.5rem; font-weight: 600;">
+            Estado de tu suscripción actualizado
+          </h2>
+
+          <div style="background: #2a2a2a; border-radius: 8px; padding: 24px; margin: 24px 0; border-left: 4px solid ${
+            currentStatus.color
+          };">
+            <p style="color: #f5f5f5; font-size: 1rem; margin: 0 0 12px 0; line-height: 1.6;">
+              <strong>Estado actual:</strong> ${currentStatus.label}
+            </p>
+            <p style="color: #cccccc; font-size: 0.95rem; margin: 0; line-height: 1.6;">
+              ${currentStatus.message}
+            </p>
+          </div>
+
+          <div class="card">
+            <h3 style="color: #9d4edd; margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 600;">
+              ¿Qué puedes hacer ahora?
+            </h3>
+            <p style="color: #cccccc; font-size: 0.95rem; margin: 0; line-height: 1.6;">
+              ${currentStatus.action}
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${dashboardUrl}" class="button">
+              Ir a mi cuenta
+            </a>
+          </div>
+
+          <!-- Información adicional basada en el estado -->
+          ${
+            status === "active"
+              ? `
+          <div style="background: #0f3f0f; border-radius: 8px; padding: 16px; margin: 24px 0; border: 1px solid #22c55e;">
+            <p style="color: #22c55e; font-size: 0.9rem; margin: 0; text-align: left;">
+              <strong>🎉 ¡Tu suscripción está activa!</strong><br>
+              • Acceso completo a todas las funcionalidades<br>
+              • Soporte prioritario<br>
+              • Actualizaciones automáticas
+            </p>
+          </div>
+          `
+              : ""
+          }
+
+          ${
+            status === "trial"
+              ? `
+          <div style="background: #1e3a8a; border-radius: 8px; padding: 16px; margin: 24px 0; border: 1px solid #3b82f6;">
+            <p style="color: #3b82f6; font-size: 0.9rem; margin: 0; text-align: left;">
+              <strong>🚀 Periodo de prueba activo</strong><br>
+              • Explora todas las funcionalidades sin limitaciones<br>
+              • Duración limitada - ¡aprovéchala al máximo!<br>
+              • Sin compromiso durante el periodo de prueba
+            </p>
+          </div>
+          `
+              : ""
+          }
+
+          ${
+            status === "expired" || status === "inactive"
+              ? `
+          <div style="background: #7c2d12; border-radius: 8px; padding: 16px; margin: 24px 0; border: 1px solid #f97316;">
+            <p style="color: #f97316; font-size: 0.9rem; margin: 0; text-align: left;">
+              <strong>⚡ Renueva tu suscripción</strong><br>
+              • Recupera el acceso completo a la plataforma<br>
+              • Mantén tus datos y configuraciones<br>
+              • Ofertas especiales disponibles para renovación
+            </p>
+          </div>
+          `
+              : ""
+          }
+
+          <p style="color: #999999; font-size: 0.9rem; margin: 32px 0 0 0; line-height: 1.5;">
+            Si tienes alguna pregunta sobre tu suscripción, no dudes en contactarnos en
+            <a href="mailto:${supportEmail}" style="color: #9d4edd; text-decoration: none;">${supportEmail}</a>.<br>
+            ¡Gracias por ser parte de Omnia!
+          </p>
+        `;
+      })()}
+    `,
+        "Actualización de Suscripción"
       ),
   };
 };

@@ -218,4 +218,37 @@ router.post("/subscription-cancel", emailController.subscriptionCancel);
  */
 router.post("/new-free-trial", emailController.newFreeTrial);
 
+/**
+ * @swagger
+ * /api/emails/change-status-subscription:
+ *   post:
+ *     summary: Envía un correo de notificación de cambio de estado de suscripción
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - status
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Correo electrónico del destinatario (se usa para obtener los datos del usuario)
+ *               status:
+ *                 type: string
+ *                 enum: [active, inactive, trial, canceled, expired, pending]
+ *                 description: Estado de la suscripción
+ *     responses:
+ *       200:
+ *         description: Correo de cambio de estado enviado correctamente
+ *       400:
+ *         description: Estado inválido proporcionado
+ */
+router.post(
+  "/change-status-subscription",
+  emailController.changeStatusSubscription
+);
+
 export default router;
