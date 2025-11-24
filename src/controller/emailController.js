@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { templates } from "../utils/templates.js";
 
+import { getUserDataBySub } from "../repository/userRespository.js";
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -208,7 +210,10 @@ const emailControllers = {
 
   newFreeTrial: async (req, res) => {
     try {
-      const { email, name, endDate } = req.body;
+      const { sub, endDate } = req.body;
+
+      const dataUser = await getUserDataBySub(sub);
+      const { name, email } = dataUser;
 
       const html = templates({
         name: safeName(name),
